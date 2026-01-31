@@ -30,181 +30,181 @@
             backdrop-filter: blur(15px);
             border-radius: 30px;
             border: 1px solid var(--glass-border);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         header h1 {
             font-size: 3.5rem;
             margin: 0;
-            letter-spacing: 2px;
             background: linear-gradient(to bottom, #fff, var(--primary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
         }
         .filter-container {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding: 15px 0;
-            margin-bottom: 30px;
-            scrollbar-width: none;
+            display: flex; gap: 10px; overflow-x: auto; padding: 15px 0; margin-bottom: 30px; scrollbar-width: none;
         }
         .filter-container::-webkit-scrollbar { display: none; }
         .filter-btn {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            color: #ccc;
-            padding: 8px 20px;
-            border-radius: 50px;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: 0.3s;
-            font-weight: 600;
+            background: var(--glass-bg); border: 1px solid var(--glass-border); color: #ccc;
+            padding: 8px 20px; border-radius: 50px; cursor: pointer; white-space: nowrap; transition: 0.3s;
         }
-        .filter-btn.active, .filter-btn:hover {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
-        }
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 30px;
-        }
+        .filter-btn.active, .filter-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; }
         .art-card {
-            position: relative;
-            border-radius: 25px;
-            overflow: hidden;
-            background: #0a0a0a;
-            border: 1px solid var(--glass-border);
-            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            cursor: pointer;
+            position: relative; border-radius: 25px; overflow: hidden; background: #0a0a0a;
+            border: 1px solid var(--glass-border); transition: 0.5s; cursor: pointer;
         }
-        .art-card:hover {
-            transform: scale(1.03);
-            border-color: var(--primary);
-            z-index: 10;
-        }
-        .art-card img {
-            width: 100%;
-            height: 450px;
-            object-fit: cover;
-            display: block;
-        }
+        .art-card img { width: 100%; height: 450px; object-fit: cover; display: block; }
         .art-content {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            padding: 25px;
-            background: linear-gradient(to top, rgba(0,0,0,1) 30%, transparent);
-            box-sizing: border-box;
+            position: absolute; bottom: 0; width: 100%; padding: 25px;
+            background: linear-gradient(to top, rgba(0,0,0,1) 30%, transparent); box-sizing: border-box;
         }
         .tags-wrapper { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
-        .category-tag {
-            background: var(--primary);
-            font-size: 0.65rem;
-            padding: 2px 8px;
-            border-radius: 4px;
-        }
-        .artist-name { font-weight: 700; font-size: 1.2rem; color: #fff; display: block; }
-        .art-desc { font-size: 0.9rem; color: #bbb; margin-top: 5px; }
+        .category-tag { background: var(--primary); font-size: 0.65rem; padding: 2px 8px; border-radius: 4px; }
+        .artist-name { font-weight: 700; font-size: 1.2rem; display: block; }
         .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.98);
-            justify-content: center; align-items: center;
-            z-index: 2000;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95); z-index: 2000; overflow-y: auto;
+            justify-content: center; padding: 20px 0;
         }
         .modal.active { display: flex; }
-        .modal img { max-width: 95%; max-height: 90vh; border-radius: 15px; box-shadow: 0 0 50px rgba(168, 85, 247, 0.3); }
+        .modal-content { 
+            width: 90%; max-width: 1000px; display: flex; flex-direction: column; gap: 0; 
+            background: #0a0a0a; border-radius: 20px; border: 1px solid var(--glass-border); overflow: hidden;
+            transition: max-width 0.4s ease;
+        }
+        .modal.fullscreen-img .modal-content { max-width: 100vw; width: 100%; height: 100vh; border-radius: 0; border: none; }
+        .modal.fullscreen-img .comment-section { display: none; }
+        .modal.fullscreen-img .modal-img-container img { max-height: 100vh; width: 100%; object-fit: contain; }
+        .modal-img-container { width: 100%; background: #000; text-align: center; cursor: zoom-in; }
+        .modal-img-container img { max-width: 100%; max-height: 70vh; transition: 0.3s; }
+        .comment-section { padding: 25px; background: #0f0f0f; border-top: 1px solid var(--glass-border); }
+        .comment-form { display: grid; gap: 10px; margin-bottom: 25px; }
+        .comment-form input, .comment-form textarea {
+            background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; font-family: 'Cairo';
+        }
+        .comment-form button {
+            background: var(--primary); color: #fff; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold;
+        }
+        .comments-list { display: flex; flex-direction: column; gap: 15px; max-height: 400px; overflow-y: auto; }
+        .comment-item { background: var(--glass-bg); padding: 15px; border-radius: 12px; border-right: 3px solid var(--primary); }
+        .comment-item b { color: var(--primary); display: block; margin-bottom: 5px; }
+        .comment-item p { margin: 0; font-size: 0.95rem; opacity: 0.9; }
+        .close-modal { position: fixed; top: 20px; left: 20px; color: #fff; font-size: 2rem; cursor: pointer; z-index: 2100; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
-
 <div class="container">
     <header>
         <h1>RESPECT GALLERY</h1>
-        <p> هنا ابداع رسامين سيرفر ريسبكت </p>
+        <p>ابداع رسامين سيرفر ريسبكت</p>
     </header>
     <div class="filter-container" id="filter-bar">
         <button class="filter-btn active" onclick="filterGallery('الكل')">الكل</button>
     </div>
     <main class="gallery-grid" id="gallery-container"></main>
 </div>
-
-<div id="artModal" class="modal" onclick="this.classList.remove('active')">
-    <img id="fullImage">
+<div id="artModal" class="modal">
+    <span class="close-modal" onclick="closeModal()">✕</span>
+    <div class="modal-content">
+        <div class="modal-img-container" onclick="toggleZoom()">
+            <img id="fullImage">
+        </div>
+        <div class="comment-section" id="commentSection">
+            <h3>التعليقات</h3>
+            <div class="comment-form">
+                <input type="text" id="comm-name" placeholder="اسمك">
+                <textarea id="comm-text" placeholder="اكتب تعليقك هنا..." rows="2"></textarea>
+                <button onclick="postComment()">إرسال التعليق</button>
+            </div>
+            <div id="comments-container" class="comments-list"></div>
+        </div>
+    </div>
 </div>
-
 <script>
     const _u = "https://tkaijxzmanyqvyhbqpok.supabase.co";
     const _k = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRrYWlqeHptYW55cXZ5aGJxcG9rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4MDE0NTMsImV4cCI6MjA4NTM3NzQ1M30.fiveTs63A7x5NOaw3dRYiejUqm_sJjQ5rGwmVKA09CU";
     const client = supabase.createClient(_u, _k);
-
-    const categories = [
-        "رسمات S5B", "رسمات F1AISAL", "رسمات الغرب", "رسمات الشرطة", 
-        "رسمات beta", "رسمات c4c", "رسمات eeid", "رسمات SLF", 
-        "رسمات imonkey_d", "رسمات عيال عبيد", "رسمات okb", "رسمات hook", 
-        "رسمات Rayn", "رسمات id7o", "رسمات البلس", "رسمات الياكوزا", 
-        "رسمات البرازلين نيوا", "رسمات لباقي العصابات", "رسمات كتاب ريسبكت"
-    ];
-
+    let allData = [];
+    let currentArtId = null;
+    const categories = ["رسمات S5B", "رسمات F1AISAL", "رسمات الغرب", "رسمات الشرطة", "رسمات beta", "رسمات c4c", "رسمات eeid", "رسمات SLF", "رسمات imonkey_d", "رسمات عيال عبيد", "رسمات okb", "رسمات hook", "رسمات Rayn", "رسمات id7o", "رسمات البلس", "رسمات الياكوزا", "رسمات البرازلين نيوا", "رسمات لباقي العصابات", "رسمات كتاب ريسبكت"];
     function initCategories() {
-        const filterBar = document.getElementById('filter-bar');
+        const bar = document.getElementById('filter-bar');
         categories.forEach(cat => {
             const btn = document.createElement('button');
             btn.className = 'filter-btn';
             btn.innerText = cat;
             btn.onclick = () => filterGallery(cat, btn);
-            filterBar.appendChild(btn);
+            bar.appendChild(btn);
         });
     }
-
-    let allData = [];
-
     async function loadContent() {
         const { data, error } = await client.from('gallery').select('*').order('created_at', { ascending: false });
-        if (error) return;
-        allData = data;
-        renderGallery(allData);
+        if (!error) { allData = data; renderGallery(allData); }
     }
-
     function renderGallery(items) {
         const container = document.getElementById('gallery-container');
         container.innerHTML = items.map(item => {
             const tags = item.category ? item.category.split(', ').map(t => `<span class="category-tag">${t}</span>`).join('') : '<span class="category-tag">عام</span>';
             return `
-                <div class="art-card" onclick="showImg('${item.image_url}')">
+                <div class="art-card" onclick="showImg('${item.image_url}', '${item.id}')">
                     <img src="${item.image_url}" loading="lazy">
                     <div class="art-content">
                         <div class="tags-wrapper">${tags}</div>
                         <span class="artist-name">${item.artist_name}</span>
-                        <small style="color:var(--primary)">${item.discord_id || ''}</small>
-                        <div class="art-desc">${item.description || ''}</div>
                     </div>
                 </div>
             `;
         }).join('');
     }
-
+    async function showImg(src, id) {
+        currentArtId = id;
+        const modal = document.getElementById("artModal");
+        document.getElementById("fullImage").src = src;
+        modal.classList.add("active");
+        modal.classList.remove("fullscreen-img");
+        loadComments(id);
+    }
+    function toggleZoom() {
+        const modal = document.getElementById("artModal");
+        modal.classList.toggle("fullscreen-img");
+    }
+    function closeModal() {
+        const modal = document.getElementById("artModal");
+        modal.classList.remove("active");
+        modal.classList.remove("fullscreen-img");
+        currentArtId = null;
+    }
+    async function loadComments(artId) {
+        const container = document.getElementById('comments-container');
+        container.innerHTML = 'جاري التحميل...';
+        const { data, error } = await client.from('comments').select('*').eq('art_id', artId).order('created_at', { ascending: false });
+        if (error || !data || data.length === 0) {
+            container.innerHTML = '<p>لا توجد تعليقات بعد. كن أول من يعلق!</p>';
+            return;
+        }
+        container.innerHTML = data.map(c => `
+            <div class="comment-item">
+                <b>${c.name}</b>
+                <p>${c.content}</p>
+            </div>
+        `).join('');
+    }
+    async function postComment() {
+        const name = document.getElementById('comm-name').value;
+        const text = document.getElementById('comm-text').value;
+        if (!name || !text) { alert('يرجى ملء الاسم والتعليق'); return; }
+        const { error } = await client.from('comments').insert([{ art_id: currentArtId, name: name, content: text }]);
+        if (error) { alert('خطأ من السيرفر: ' + error.message); } 
+        else {
+            document.getElementById('comm-text').value = '';
+            loadComments(currentArtId);
+        }
+    }
     function filterGallery(category, btn) {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         if(btn) btn.classList.add('active');
-        if (category === 'الكل') {
-            renderGallery(allData);
-        } else {
-            const filtered = allData.filter(item => item.category && item.category.includes(category));
-            renderGallery(filtered);
-        }
+        if (category === 'الكل') renderGallery(allData);
+        else renderGallery(allData.filter(item => item.category && item.category.includes(category)));
     }
-
-    function showImg(src) {
-        document.getElementById("fullImage").src = src;
-        document.getElementById("artModal").classList.add("active");
-    }
-
     initCategories();
     loadContent();
 </script>
