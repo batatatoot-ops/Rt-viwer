@@ -128,11 +128,9 @@
         <h1>RESPECT GALLERY</h1>
         <p> هنا ابداع رسامين سيرفر ريسبكت </p>
     </header>
-
     <div class="filter-container" id="filter-bar">
         <button class="filter-btn active" onclick="filterGallery('الكل')">الكل</button>
     </div>
-
     <main class="gallery-grid" id="gallery-container"></main>
 </div>
 
@@ -194,7 +192,6 @@
     function filterGallery(category, btn) {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         if(btn) btn.classList.add('active');
-
         if (category === 'الكل') {
             renderGallery(allData);
         } else {
