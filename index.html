@@ -13,7 +13,6 @@
             --glass-bg: rgba(255, 255, 255, 0.03);
             --glass-border: rgba(255, 255, 255, 0.1);
         }
-
         body {
             font-family: 'Cairo', sans-serif;
             background: radial-gradient(circle at center, #1e003d, #050505);
@@ -22,10 +21,7 @@
             padding: 20px;
             min-height: 100vh;
         }
-
         .container { max-width: 1300px; margin: auto; }
-
-        /* Header */
         header {
             text-align: center;
             padding: 50px 20px;
@@ -36,7 +32,6 @@
             border: 1px solid var(--glass-border);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-
         header h1 {
             font-size: 3.5rem;
             margin: 0;
@@ -46,8 +41,6 @@
             -webkit-text-fill-color: transparent;
             text-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
         }
-
-        /* Filter Section */
         .filter-container {
             display: flex;
             gap: 10px;
@@ -57,7 +50,6 @@
             scrollbar-width: none;
         }
         .filter-container::-webkit-scrollbar { display: none; }
-
         .filter-btn {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
@@ -69,21 +61,17 @@
             transition: 0.3s;
             font-weight: 600;
         }
-
         .filter-btn.active, .filter-btn:hover {
             background: var(--primary);
             color: white;
             border-color: var(--primary);
             box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
         }
-
-        /* Gallery Grid */
         .gallery-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 30px;
         }
-
         .art-card {
             position: relative;
             border-radius: 25px;
@@ -93,20 +81,17 @@
             transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             cursor: pointer;
         }
-
         .art-card:hover {
             transform: scale(1.03);
             border-color: var(--primary);
             z-index: 10;
         }
-
         .art-card img {
             width: 100%;
             height: 450px;
             object-fit: cover;
             display: block;
         }
-
         .art-content {
             position: absolute;
             bottom: 0;
@@ -115,20 +100,15 @@
             background: linear-gradient(to top, rgba(0,0,0,1) 30%, transparent);
             box-sizing: border-box;
         }
-
+        .tags-wrapper { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
         .category-tag {
             background: var(--primary);
-            font-size: 0.7rem;
-            padding: 2px 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            display: inline-block;
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 4px;
         }
-
         .artist-name { font-weight: 700; font-size: 1.2rem; color: #fff; display: block; }
         .art-desc { font-size: 0.9rem; color: #bbb; margin-top: 5px; }
-
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -139,7 +119,6 @@
         }
         .modal.active { display: flex; }
         .modal img { max-width: 95%; max-height: 90vh; border-radius: 15px; box-shadow: 0 0 50px rgba(168, 85, 247, 0.3); }
-
     </style>
 </head>
 <body>
@@ -162,7 +141,6 @@
 </div>
 
 <script>
-    // الإعدادات
     const _u = "https://tkaijxzmanyqvyhbqpok.supabase.co";
     const _k = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRrYWlqeHptYW55cXZ5aGJxcG9rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4MDE0NTMsImV4cCI6MjA4NTM3NzQ1M30.fiveTs63A7x5NOaw3dRYiejUqm_sJjQ5rGwmVKA09CU";
     const client = supabase.createClient(_u, _k);
@@ -175,10 +153,8 @@
         "رسمات البرازلين نيوا", "رسمات لباقي العصابات", "رسمات كتاب ريسبكت"
     ];
 
-    // تهيئة أزرار الفلترة فقط
     function initCategories() {
         const filterBar = document.getElementById('filter-bar');
-        
         categories.forEach(cat => {
             const btn = document.createElement('button');
             btn.className = 'filter-btn';
@@ -199,28 +175,30 @@
 
     function renderGallery(items) {
         const container = document.getElementById('gallery-container');
-        container.innerHTML = items.map(item => `
-            <div class="art-card" onclick="showImg('${item.image_url}')">
-                <img src="${item.image_url}" loading="lazy">
-                <div class="art-content">
-                    <span class="category-tag">${item.category || 'عام'}</span>
-                    <span class="artist-name">${item.artist_name}</span>
-                    <small style="color:var(--primary)">${item.discord_id || ''}</small>
-                    <div class="art-desc">${item.description || ''}</div>
+        container.innerHTML = items.map(item => {
+            const tags = item.category ? item.category.split(', ').map(t => `<span class="category-tag">${t}</span>`).join('') : '<span class="category-tag">عام</span>';
+            return `
+                <div class="art-card" onclick="showImg('${item.image_url}')">
+                    <img src="${item.image_url}" loading="lazy">
+                    <div class="art-content">
+                        <div class="tags-wrapper">${tags}</div>
+                        <span class="artist-name">${item.artist_name}</span>
+                        <small style="color:var(--primary)">${item.discord_id || ''}</small>
+                        <div class="art-desc">${item.description || ''}</div>
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     function filterGallery(category, btn) {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         if(btn) btn.classList.add('active');
-        else document.querySelector('.filter-btn').classList.add('active');
 
         if (category === 'الكل') {
             renderGallery(allData);
         } else {
-            const filtered = allData.filter(item => item.category === category);
+            const filtered = allData.filter(item => item.category && item.category.includes(category));
             renderGallery(filtered);
         }
     }
