@@ -12,6 +12,8 @@
             --primary-hover: #9333ea;
             --glass-bg: rgba(255, 255, 255, 0.03);
             --glass-border: rgba(255, 255, 255, 0.1);
+            --twitter: #1DA1F2;
+            --heart: #ef4444;
         }
         body {
             font-family: 'Cairo', sans-serif;
@@ -60,6 +62,12 @@
         .tags-wrapper { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
         .category-tag { background: var(--primary); font-size: 0.65rem; padding: 2px 8px; border-radius: 4px; }
         .artist-name { font-weight: 700; font-size: 1.2rem; display: block; }
+        
+        .card-stats {
+            display: flex; gap: 15px; margin-top: 10px; font-size: 0.85rem; color: #bbb;
+        }
+        .stat-item { display: flex; align-items: center; gap: 5px; }
+
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.95); z-index: 2000; overflow-y: auto;
@@ -67,16 +75,26 @@
         }
         .modal.active { display: flex; }
         .modal-content { 
-            width: 90%; max-width: 1000px; display: flex; flex-direction: column; gap: 0; 
+            width: 90%; max-width: 1000px; display: flex; flex-direction: column; 
             background: #0a0a0a; border-radius: 20px; border: 1px solid var(--glass-border); overflow: hidden;
-            transition: max-width 0.4s ease;
         }
-        .modal.fullscreen-img .modal-content { max-width: 100vw; width: 100%; height: 100vh; border-radius: 0; border: none; }
-        .modal.fullscreen-img .comment-section { display: none; }
-        .modal.fullscreen-img .modal-img-container img { max-height: 100vh; width: 100%; object-fit: contain; }
-        .modal-img-container { width: 100%; background: #000; text-align: center; cursor: zoom-in; }
-        .modal-img-container img { max-width: 100%; max-height: 70vh; transition: 0.3s; }
-        .comment-section { padding: 25px; background: #0f0f0f; border-top: 1px solid var(--glass-border); }
+        .modal-img-container { width: 100%; background: #000; text-align: center; cursor: zoom-in; position: relative; }
+        .modal-img-container img { max-width: 100%; max-height: 70vh; }
+        
+        .interaction-bar {
+            padding: 15px 25px; display: flex; justify-content: space-between; align-items: center;
+            background: #111; border-bottom: 1px solid #222;
+        }
+        .like-btn {
+            background: rgba(239, 68, 68, 0.1); color: var(--heart); border: 1px solid var(--heart);
+            padding: 8px 20px; border-radius: 50px; cursor: pointer; font-weight: bold; transition: 0.3s;
+        }
+        .like-btn.liked { background: var(--heart); color: white; }
+        .twitter-btn {
+            color: var(--twitter); text-decoration: none; font-weight: bold; display: flex; align-items: center; gap: 5px;
+        }
+
+        .comment-section { padding: 25px; background: #0f0f0f; }
         .comment-form { display: grid; gap: 10px; margin-bottom: 25px; }
         .comment-form input, .comment-form textarea {
             background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; font-family: 'Cairo';
@@ -86,9 +104,7 @@
         }
         .comments-list { display: flex; flex-direction: column; gap: 15px; max-height: 400px; overflow-y: auto; }
         .comment-item { background: var(--glass-bg); padding: 15px; border-radius: 12px; border-right: 3px solid var(--primary); }
-        .comment-item b { color: var(--primary); display: block; margin-bottom: 5px; }
-        .comment-item p { margin: 0; font-size: 0.95rem; opacity: 0.9; }
-        .close-modal { position: fixed; top: 20px; left: 20px; color: #fff; font-size: 2rem; cursor: pointer; z-index: 2100; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .close-modal { position: fixed; top: 20px; left: 20px; color: #fff; font-size: 2rem; cursor: pointer; z-index: 2100; }
     </style>
 </head>
 <body>
@@ -102,13 +118,21 @@
     </div>
     <main class="gallery-grid" id="gallery-container"></main>
 </div>
+
 <div id="artModal" class="modal">
     <span class="close-modal" onclick="closeModal()">✕</span>
     <div class="modal-content">
-        <div class="modal-img-container" onclick="toggleZoom()">
+        <div class="modal-img-container" onclick="window.open(document.getElementById('fullImage').src, '_blank')">
             <img id="fullImage">
         </div>
-        <div class="comment-section" id="commentSection">
+        <div class="interaction-bar">
+            <div style="display: flex; gap: 20px; align-items: center;">
+                <button id="likeButton" class="like-btn" onclick="handleLike()">❤️ <span id="likeCount">0</span></button>
+                <span id="viewCountDisplay" style="color: #888;">👁️ 0</span>
+            </div>
+            <a id="twitterLink" href="#" target="_blank" class="twitter-btn">Twitter 𝕏</a>
+        </div>
+        <div class="comment-section">
             <h3>التعليقات</h3>
             <div class="comment-form">
                 <input type="text" id="comm-name" placeholder="اسمك">
@@ -119,13 +143,16 @@
         </div>
     </div>
 </div>
+
 <script>
     const _u = "https://tkaijxzmanyqvyhbqpok.supabase.co";
     const _k = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRrYWlqeHptYW55cXZ5aGJxcG9rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4MDE0NTMsImV4cCI6MjA4NTM3NzQ1M30.fiveTs63A7x5NOaw3dRYiejUqm_sJjQ5rGwmVKA09CU";
     const client = supabase.createClient(_u, _k);
+    
     let allData = [];
-    let currentArtId = null;
+    let currentArt = null;
     const categories = ["رسمات S5B", "رسمات F1AISAL", "رسمات الغرب", "رسمات الشرطة", "رسمات beta", "رسمات c4c", "رسمات eeid", "رسمات SLF", "رسمات imonkey_d", "رسمات عيال عبيد", "رسمات okb", "رسمات hook", "رسمات Rayn", "رسمات id7o", "رسمات البلس", "رسمات الياكوزا", "رسمات البرازلين نيوا", "رسمات لباقي العصابات", "رسمات كتاب ريسبكت"];
+
     function initCategories() {
         const bar = document.getElementById('filter-bar');
         categories.forEach(cat => {
@@ -136,75 +163,108 @@
             bar.appendChild(btn);
         });
     }
+
     async function loadContent() {
         const { data, error } = await client.from('gallery').select('*').order('created_at', { ascending: false });
         if (!error) { allData = data; renderGallery(allData); }
     }
+
     function renderGallery(items) {
         const container = document.getElementById('gallery-container');
         container.innerHTML = items.map(item => {
             const tags = item.category ? item.category.split(', ').map(t => `<span class="category-tag">${t}</span>`).join('') : '<span class="category-tag">عام</span>';
             return `
-                <div class="art-card" onclick="showImg('${item.image_url}', '${item.id}')">
+                <div class="art-card" onclick="showImg('${item.id}')">
                     <img src="${item.image_url}" loading="lazy">
                     <div class="art-content">
                         <div class="tags-wrapper">${tags}</div>
                         <span class="artist-name">${item.artist_name}</span>
+                        <div class="card-stats">
+                            <span class="stat-item">👁️ ${item.views || 0}</span>
+                            <span class="stat-item">❤️ ${item.likes || 0}</span>
+                        </div>
                     </div>
                 </div>
             `;
         }).join('');
     }
-    async function showImg(src, id) {
-        currentArtId = id;
+
+    async function showImg(id) {
+        const item = allData.find(a => a.id == id);
+        if(!item) return;
+        currentArt = item;
+        
         const modal = document.getElementById("artModal");
-        document.getElementById("fullImage").src = src;
+        document.getElementById("fullImage").src = item.image_url;
+        document.getElementById("likeCount").innerText = item.likes || 0;
+        document.getElementById("viewCountDisplay").innerText = `👁️ ${item.views || 0}`;
+        
+        const tw = document.getElementById("twitterLink");
+        if(item.twitter_url) { tw.href = item.twitter_url; tw.style.display = 'flex'; }
+        else { tw.style.display = 'none'; }
+
         modal.classList.add("active");
-        modal.classList.remove("fullscreen-img");
+        
+        incrementView(id);
         loadComments(id);
     }
-    function toggleZoom() {
-        const modal = document.getElementById("artModal");
-        modal.classList.toggle("fullscreen-img");
+
+    async function incrementView(id) {
+        const item = allData.find(a => a.id == id);
+        const newViews = (item.views || 0) + 1;
+        await client.from('gallery').update({ views: newViews }).eq('id', id);
+        item.views = newViews; 
     }
+
+    async function handleLike() {
+        const btn = document.getElementById('likeButton');
+        if(btn.classList.contains('liked')) return;
+
+        const newLikes = (currentArt.likes || 0) + 1;
+        const { error } = await client.from('gallery').update({ likes: newLikes }).eq('id', currentArt.id);
+        
+        if(!error) {
+            currentArt.likes = newLikes;
+            document.getElementById("likeCount").innerText = newLikes;
+            btn.classList.add('liked');
+        }
+    }
+
     function closeModal() {
-        const modal = document.getElementById("artModal");
-        modal.classList.remove("active");
-        modal.classList.remove("fullscreen-img");
-        currentArtId = null;
+        document.getElementById("artModal").classList.remove("active");
+        document.getElementById('likeButton').classList.remove('liked');
+        loadContent(); 
     }
+
     async function loadComments(artId) {
         const container = document.getElementById('comments-container');
         container.innerHTML = 'جاري التحميل...';
-        const { data, error } = await client.from('comments').select('*').eq('art_id', artId).order('created_at', { ascending: false });
-        if (error || !data || data.length === 0) {
-            container.innerHTML = '<p>لا توجد تعليقات بعد. كن أول من يعلق!</p>';
+        const { data } = await client.from('comments').select('*').eq('art_id', artId).order('created_at', { ascending: false });
+        if (!data || data.length === 0) {
+            container.innerHTML = '<p>لا توجد تعليقات بعد.</p>';
             return;
         }
-        container.innerHTML = data.map(c => `
-            <div class="comment-item">
-                <b>${c.name}</b>
-                <p>${c.content}</p>
-            </div>
-        `).join('');
+        container.innerHTML = data.map(c => `<div class="comment-item"><b>${c.name}</b><p>${c.content}</p></div>`).join('');
     }
+
     async function postComment() {
         const name = document.getElementById('comm-name').value;
         const text = document.getElementById('comm-text').value;
-        if (!name || !text) { alert('يرجى ملء الاسم والتعليق'); return; }
-        const { error } = await client.from('comments').insert([{ art_id: currentArtId, name: name, content: text }]);
-        if (error) { alert('خطأ من السيرفر: ' + error.message); } 
-        else {
+        if (!name || !text) return alert('أكمل البيانات');
+        const { error } = await client.from('comments').insert([{ art_id: currentArt.id, name: name, content: text }]);
+        if (!error) {
             document.getElementById('comm-text').value = '';
-            loadComments(currentArtId);
+            loadComments(currentArt.id);
         }
     }
+
     function filterGallery(category, btn) {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         if(btn) btn.classList.add('active');
         if (category === 'الكل') renderGallery(allData);
         else renderGallery(allData.filter(item => item.category && item.category.includes(category)));
     }
+
     initCategories();
     loadContent();
 </script>
