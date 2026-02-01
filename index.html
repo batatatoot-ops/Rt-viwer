@@ -89,6 +89,7 @@
 <div id="authModal" class="auth-modal">
     <div class="auth-box">
         <h2 id="authTitle" style="text-align:center; margin-top:0">دخول</h2>
+        <input type="text" id="authUsername" placeholder="اسم المستخدم (سيظهر للجميع)" style="display:none">
         <input type="email" id="authEmail" placeholder="البريد الإلكتروني">
         <input type="password" id="authPass" placeholder="كلمة المرور">
         <button id="authBtn" onclick="handleAuth()">تأكيد</button>
@@ -113,7 +114,7 @@
             <h3>التعليقات</h3>
             <div class="comment-form">
                 <textarea id="comm-text" placeholder="اكتب تعليقك هنا..." rows="2"></textarea>
-                <button onclick="checkAuthAction(postComment)">إرسال التعليق</button>
+                <button id="submitCommentBtn" onclick="checkAuthAction(postComment)">إرسال التعليق</button>
             </div>
             <div id="comments-container" class="comments-list"></div>
         </div>
@@ -146,7 +147,8 @@
         currentUser = user;
         const bar = document.getElementById('authBar');
         if(user) {
-            bar.innerHTML = `<span style="font-size:0.8rem; color:#aaa; align-self:center">${user.email}</span>
+            const displayName = user.user_metadata.username || user.email.split('@')[0];
+            bar.innerHTML = `<span style="font-size:0.9rem; color:#a855f7; align-self:center; font-weight:bold">مرحباً، ${displayName}</span>
                              <button class="btn-small" onclick="client.auth.signOut().then(()=>location.reload())">خروج</button>`;
         }
     }
@@ -154,6 +156,7 @@
     function openAuth(mode) {
         authMode = mode;
         document.getElementById('authTitle').innerText = mode === 'login' ? 'تسجيل دخول' : 'حساب جديد';
+        document.getElementById('authUsername').style.display = mode === 'signup' ? 'block' : 'none';
         document.getElementById('authModal').style.display = 'flex';
     }
 
@@ -162,14 +165,25 @@
     async function handleAuth() {
         const email = document.getElementById('authEmail').value;
         const password = document.getElementById('authPass').value;
-        if(!email || !password) return alert('أدخل البيانات');
+        const username = document.getElementById('authUsername').value;
+
+        if(!email || !password) return alert('أدخل البيانات الأساسية');
+        if(authMode === 'signup' && !username) return alert('يرجى اختيار اسم مستخدم');
+
         let res;
         if(authMode === 'signup') {
-            res = await client.auth.signUp({ email, password });
-            if(!res.error) alert('تم إنشاء الحساب بنجاح!');
+            res = await client.auth.signUp({ 
+                email, 
+                password,
+                options: {
+                    data: { username: username }
+                }
+            });
+            if(!res.error) alert('تم إنشاء الحساب بنجاح! يمكنك الدخول الآن.');
         } else {
             res = await client.auth.signInWithPassword({ email, password });
         }
+
         if(res.error) alert(res.error.message);
         else { closeAuth(); checkUser(); }
     }
@@ -238,16 +252,45 @@
     }
 
     async function loadComments(artId) {
-        const { data } = await client.from('comments').select('*').eq('art_id', artId).order('created_at', { ascending: false });
         const container = document.getElementById('comments-container');
-        container.innerHTML = data && data.length ? data.map(c => `<div class="comment-item"><b>${c.name}</b><p>${c.content}</p></div>`).join('') : '<p style="color:#555">لا توجد تعليقات.</p>';
+        container.innerHTML = '<p style="color:#888">جاري التحميل...</p>';
+        
+        const { data, error } = await client.from('comments').select('*').eq('art_id', artId).order('created_at', { ascending: false });
+        
+        if (error) {
+            console.error("Error loading comments:", error);
+            container.innerHTML = '<p style="color:red">فشل تحميل التعليقات</p>';
+            return;
+        }
+
+        container.innerHTML = data && data.length 
+            ? data.map(c => `<div class="comment-item"><b>${c.name}</b><p>${c.content}</p></div>`).join('') 
+            : '<p style="color:#555">لا توجد تعليقات بعد، كن أول من يعلق!</p>';
     }
 
     async function postComment() {
+        const btn = document.getElementById('submitCommentBtn');
         const text = document.getElementById('comm-text').value;
-        if (!text) return;
-        const { error } = await client.from('comments').insert([{ art_id: currentArt.id, name: currentUser.email.split('@')[0], content: text }]);
-        if (!error) { document.getElementById('comm-text').value = ''; loadComments(currentArt.id); }
+        if (!text.trim()) return;
+
+        btn.disabled = true;
+        const userDisplayName = currentUser.user_metadata.username || currentUser.email.split('@')[0];
+
+        const { error } = await client.from('comments').insert([
+            { 
+                art_id: currentArt.id, 
+                name: userDisplayName, 
+                content: text 
+            }
+        ]);
+
+        btn.disabled = false;
+        if (!error) { 
+            document.getElementById('comm-text').value = ''; 
+            await loadComments(currentArt.id); 
+        } else {
+            alert('فشل إرسال التعليق: ' + error.message);
+        }
     }
 
     function filterGallery(category, btn) {
