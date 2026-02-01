@@ -129,6 +129,7 @@
     let currentUser = null;
     let authMode = 'login';
     const categories = ["رسمات S5B", "رسمات F1AISAL", "رسمات الغرب", "رسمات الشرطة", "رسمات beta", "رسمات c4c", "رسمات eeid", "رسمات SLF", "رسمات imonkey_d", "رسمات عيال عبيد", "رسمات okb", "رسمات hook", "رسمات Rayn", "رسمات id7o", "رسمات البلس", "رسمات الياكوزا", "رسمات البرازلين نيوا", "رسمات drb7h", "رسمات المافيا الروسية", "رسمات لباقي العصابات", "رسمات كتاب ريسبكت"];
+    
     function initCategories() {
         const bar = document.getElementById('filter-bar');
         categories.forEach(cat => {
@@ -139,6 +140,7 @@
             bar.appendChild(btn);
         });
     }
+
     async function checkUser() {
         const { data: { user } } = await client.auth.getUser();
         currentUser = user;
@@ -148,12 +150,15 @@
                              <button class="btn-small" onclick="client.auth.signOut().then(()=>location.reload())">خروج</button>`;
         }
     }
+
     function openAuth(mode) {
         authMode = mode;
         document.getElementById('authTitle').innerText = mode === 'login' ? 'تسجيل دخول' : 'حساب جديد';
         document.getElementById('authModal').style.display = 'flex';
     }
+
     function closeAuth() { document.getElementById('authModal').style.display = 'none'; }
+
     async function handleAuth() {
         const email = document.getElementById('authEmail').value;
         const password = document.getElementById('authPass').value;
@@ -168,14 +173,17 @@
         if(res.error) alert(res.error.message);
         else { closeAuth(); checkUser(); }
     }
+
     function checkAuthAction(callback) {
         if(!currentUser) return openAuth('login');
         callback();
     }
+
     async function loadContent() {
         const { data } = await client.from('gallery').select('*').order('created_at', { ascending: false });
         if (data) { allData = data; renderGallery(data); }
     }
+
     function renderGallery(items) {
         const container = document.getElementById('gallery-container');
         container.innerHTML = items.map(item => {
@@ -191,21 +199,31 @@
             </div>`;
         }).join('');
     }
+
     async function showImg(id) {
         currentArt = allData.find(a => a.id == id);
         const modal = document.getElementById("artModal");
         document.getElementById("fullImage").src = currentArt.image_url;
         document.getElementById("likeCount").innerText = currentArt.likes || 0;
+        
+        const viewKey = `viewed_${id}`;
+        const hasViewed = localStorage.getItem(viewKey);
+        
+        if (!hasViewed) {
+            const newViews = (currentArt.views || 0) + 1;
+            await client.from('gallery').update({ views: newViews }).eq('id', id);
+            currentArt.views = newViews;
+            localStorage.setItem(viewKey, 'true');
+        }
+        
         document.getElementById("viewCountDisplay").innerText = `👁️ ${currentArt.views || 0}`;
         const tw = document.getElementById("twitterLink");
         tw.style.display = currentArt.twitter_url ? 'block' : 'none';
         tw.href = currentArt.twitter_url || '#';
         modal.classList.add("active");
-        const newViews = (currentArt.views || 0) + 1;
-        await client.from('gallery').update({ views: newViews }).eq('id', id);
-        currentArt.views = newViews;
         loadComments(id);
     }
+
     async function handleLike() {
         const { data: alreadyLiked } = await client.from('likes').select('*').eq('user_id', currentUser.id).eq('art_id', currentArt.id).single();
         if(alreadyLiked) return alert('لقد وضعت لايك بالفعل!');
@@ -218,23 +236,28 @@
             document.getElementById('likeButton').classList.add('liked');
         }
     }
+
     async function loadComments(artId) {
         const { data } = await client.from('comments').select('*').eq('art_id', artId).order('created_at', { ascending: false });
         const container = document.getElementById('comments-container');
         container.innerHTML = data && data.length ? data.map(c => `<div class="comment-item"><b>${c.name}</b><p>${c.content}</p></div>`).join('') : '<p style="color:#555">لا توجد تعليقات.</p>';
     }
+
     async function postComment() {
         const text = document.getElementById('comm-text').value;
         if (!text) return;
         const { error } = await client.from('comments').insert([{ art_id: currentArt.id, name: currentUser.email.split('@')[0], content: text }]);
         if (!error) { document.getElementById('comm-text').value = ''; loadComments(currentArt.id); }
     }
+
     function filterGallery(category, btn) {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         if(btn) btn.classList.add('active');
         renderGallery(category === 'الكل' ? allData : allData.filter(item => item.category && item.category.includes(category)));
     }
+
     function closeModal() { document.getElementById("artModal").classList.remove("active"); loadContent(); }
+
     initCategories();
     checkUser();
     loadContent();
