@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RESPECT GALLERY</title>
+    <title>RESPECT GALLERY - VIEW</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -66,7 +66,10 @@
         .comment-form button { background: var(--primary); color: #fff; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .comments-list { display: flex; flex-direction: column; gap: 15px; max-height: 300px; overflow-y: auto; }
         .comment-item { background: var(--glass-bg); padding: 15px; border-radius: 12px; border-right: 3px solid var(--primary); }
+        .description-box { margin-top: 20px; padding: 15px; background: rgba(168, 85, 247, 0.05); border-radius: 12px; border: 1px solid rgba(168, 85, 247, 0.1); color: #ccc; font-size: 0.95rem; }
         .close-modal { position: fixed; top: 20px; left: 20px; color: #fff; font-size: 2rem; cursor: pointer; z-index: 2100; }
+        footer { text-align: center; padding: 40px; margin-top: 50px; border-top: 1px solid var(--glass-border); color: #888; line-height: 1.8; }
+        footer b { color: var(--primary); }
     </style>
 </head>
 <body>
@@ -78,18 +81,24 @@
     </div>
     <header>
         <h1>RESPECT GALLERY</h1>
-        <p>ابداع رسامين سيرفر ريسبكت</p>
+        <p>إبداع رسامين سيرفر ريسبكت</p>
     </header>
     <div class="filter-container" id="filter-bar">
         <button class="filter-btn active" onclick="filterGallery('الكل')">الكل</button>
     </div>
     <main class="gallery-grid" id="gallery-container"></main>
+    
+    <footer>
+        تمت برمجة الموقع بواسطت <b>BATATA_FALCON</b><br>
+        تحت إشراف كل من<br>
+        <b>nou8l</b> & <b>Rt_times1</b>
+    </footer>
 </div>
 
 <div id="authModal" class="auth-modal">
     <div class="auth-box">
         <h2 id="authTitle" style="text-align:center; margin-top:0">دخول</h2>
-        <input type="text" id="authUsername" placeholder="اسم المستخدم (سيظهر للجميع)" style="display:none">
+        <input type="text" id="authUsername" placeholder="اسم المستخدم" style="display:none">
         <input type="email" id="authEmail" placeholder="البريد الإلكتروني">
         <input type="password" id="authPass" placeholder="كلمة المرور">
         <button id="authBtn" onclick="handleAuth()">تأكيد</button>
@@ -111,7 +120,11 @@
             <a id="twitterLink" href="#" target="_blank" style="color:var(--twitter); text-decoration:none; font-weight:bold">Twitter 𝕏</a>
         </div>
         <div class="comment-section">
-            <h3>التعليقات</h3>
+            <div id="desc-container">
+                <h4 style="color:var(--primary); margin-bottom:10px">وصف الرسمة</h4>
+                <div id="artDescription" class="description-box"></div>
+            </div>
+            <h4 style="margin: 25px 0 15px">التعليقات</h4>
             <div class="comment-form">
                 <textarea id="comm-text" placeholder="اكتب تعليقك هنا..." rows="2"></textarea>
                 <button id="submitCommentBtn" onclick="checkAuthAction(postComment)">إرسال التعليق</button>
@@ -120,7 +133,6 @@
         </div>
     </div>
 </div>
-
 <script>
     const _u = "https://tkaijxzmanyqvyhbqpok.supabase.co";
     const _k = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRrYWlqeHptYW55cXZ5aGJxcG9rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4MDE0NTMsImV4cCI6MjA4NTM3NzQ1M30.fiveTs63A7x5NOaw3dRYiejUqm_sJjQ5rGwmVKA09CU";
@@ -129,7 +141,18 @@
     let currentArt = null;
     let currentUser = null;
     let authMode = 'login';
-    const categories = ["رسمات S5B", "رسمات F1AISAL", "رسمات الغرب", "رسمات الشرطة", "رسمات beta", "رسمات c4c", "رسمات eeid", "رسمات SLF", "رسمات imonkey_d", "رسمات عيال عبيد", "رسمات okb", "رسمات hook", "رسمات Rayn", "رسمات id7o", "رسمات البلس", "رسمات الياكوزا", "رسمات البرازلين نيوا", "رسمات drb7h", "رسمات المافيا الروسية", "رسمات لباقي العصابات", "رسمات كتاب ريسبكت"];
+    
+    const categories = [
+        "رسمات S5B", "رسمات F1AISAL", "رسمات الغرب", "رسمات الشرطة", 
+        "رسمات beta", "رسمات c4c", "رسمات eeid", "رسمات SLF", 
+        "رسمات imonkey_d", "رسمات عيال عبيد", "رسمات okb", "رسمات hook", 
+        "رسمات Rayn", "رسمات id7o", "رسمات البلس", "رسمات الياكوزا", 
+        "رسمات البرازلين نيوا", "رسمات drb7h", "رسمات المافيا الروسية", 
+        "رسمات لباقي العصابات", "رسمات كتاب ريسبكت", "رسمات W1ype", 
+        "رسمات Wolf", "رسمات xKndrx", "رسمات NEFOXD", "رسمات Seagull", 
+        "رسمات i2Reap", "رسمات AYMNALSTAM", "رسمات SODRY", 
+        "رسمات odayyoyou", "رسمات ABOKHALED_SA"
+    ];
     
     function initCategories() {
         const bar = document.getElementById('filter-bar');
@@ -166,24 +189,14 @@
         const email = document.getElementById('authEmail').value;
         const password = document.getElementById('authPass').value;
         const username = document.getElementById('authUsername').value;
-
-        if(!email || !password) return alert('أدخل البيانات الأساسية');
-        if(authMode === 'signup' && !username) return alert('يرجى اختيار اسم مستخدم');
-
+        if(!email || !password) return alert('أدخل البيانات');
         let res;
         if(authMode === 'signup') {
-            res = await client.auth.signUp({ 
-                email, 
-                password,
-                options: {
-                    data: { username: username }
-                }
-            });
-            if(!res.error) alert('تم إنشاء الحساب بنجاح! يمكنك الدخول الآن.');
+            res = await client.auth.signUp({ email, password, options: { data: { username: username } } });
+            if(!res.error) alert('تم إنشاء الحساب!');
         } else {
             res = await client.auth.signInWithPassword({ email, password });
         }
-
         if(res.error) alert(res.error.message);
         else { closeAuth(); checkUser(); }
     }
@@ -202,8 +215,7 @@
         const container = document.getElementById('gallery-container');
         container.innerHTML = items.map(item => {
             const tags = item.category ? item.category.split(', ').map(t => `<span class="category-tag">${t}</span>`).join('') : '';
-            return `
-            <div class="art-card" onclick="showImg('${item.id}')">
+            return `<div class="art-card" onclick="showImg('${item.id}')">
                 <img src="${item.image_url}" loading="lazy">
                 <div class="art-content">
                     <div class="tags-wrapper">${tags}</div>
@@ -216,14 +228,12 @@
 
     async function showImg(id) {
         currentArt = allData.find(a => a.id == id);
-        const modal = document.getElementById("artModal");
         document.getElementById("fullImage").src = currentArt.image_url;
         document.getElementById("likeCount").innerText = currentArt.likes || 0;
+        document.getElementById("artDescription").innerText = currentArt.description || "لا يوجد وصف لهذا العمل.";
         
         const viewKey = `viewed_${id}`;
-        const hasViewed = localStorage.getItem(viewKey);
-        
-        if (!hasViewed) {
+        if (!localStorage.getItem(viewKey)) {
             const newViews = (currentArt.views || 0) + 1;
             await client.from('gallery').update({ views: newViews }).eq('id', id);
             currentArt.views = newViews;
@@ -234,7 +244,7 @@
         const tw = document.getElementById("twitterLink");
         tw.style.display = currentArt.twitter_url ? 'block' : 'none';
         tw.href = currentArt.twitter_url || '#';
-        modal.classList.add("active");
+        document.getElementById("artModal").classList.add("active");
         loadComments(id);
     }
 
@@ -253,43 +263,20 @@
 
     async function loadComments(artId) {
         const container = document.getElementById('comments-container');
-        container.innerHTML = '<p style="color:#888">جاري التحميل...</p>';
-        
-        const { data, error } = await client.from('comments').select('*').eq('art_id', artId).order('created_at', { ascending: false });
-        
-        if (error) {
-            console.error("Error loading comments:", error);
-            container.innerHTML = '<p style="color:red">فشل تحميل التعليقات</p>';
-            return;
-        }
-
+        const { data } = await client.from('comments').select('*').eq('art_id', artId).order('created_at', { ascending: false });
         container.innerHTML = data && data.length 
             ? data.map(c => `<div class="comment-item"><b>${c.name}</b><p>${c.content}</p></div>`).join('') 
-            : '<p style="color:#555">لا توجد تعليقات بعد، كن أول من يعلق!</p>';
+            : '<p style="color:#555">لا توجد تعليقات بعد.</p>';
     }
 
     async function postComment() {
-        const btn = document.getElementById('submitCommentBtn');
         const text = document.getElementById('comm-text').value;
         if (!text.trim()) return;
-
-        btn.disabled = true;
         const userDisplayName = currentUser.user_metadata.username || currentUser.email.split('@')[0];
-
-        const { error } = await client.from('comments').insert([
-            { 
-                art_id: currentArt.id, 
-                name: userDisplayName, 
-                content: text 
-            }
-        ]);
-
-        btn.disabled = false;
+        const { error } = await client.from('comments').insert([{ art_id: currentArt.id, name: userDisplayName, content: text }]);
         if (!error) { 
             document.getElementById('comm-text').value = ''; 
-            await loadComments(currentArt.id); 
-        } else {
-            alert('فشل إرسال التعليق: ' + error.message);
+            loadComments(currentArt.id); 
         }
     }
 
